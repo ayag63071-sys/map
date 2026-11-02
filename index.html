@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>خريطة أنماط برامج التدخل والتدريب</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f3f6fb;--surface:#fff;--ink:#16213a;--mute:#5d6a85;--line:#d9e0ee;--root:#16213a;--rootink:#fff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1424;--surface:#18203a;--ink:#eaf0ff;--mute:#9aa8c8;--line:#2a3558;--root:#eaf0ff;--rootink:#0e1424}}
+:root[data-theme="dark"]{--bg:#0e1424;--surface:#18203a;--ink:#eaf0ff;--mute:#9aa8c8;--line:#2a3558;--root:#eaf0ff;--rootink:#0e1424}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Cairo,Tahoma,Arial,sans-serif;line-height:1.7}
+main{max-width:980px;margin:0 auto;padding:20px 14px 48px}
+.root{display:block;margin:0 auto 6px;background:var(--root);color:var(--rootink);font-weight:800;font-size:clamp(18px,4vw,26px);padding:16px 30px;border-radius:999px;text-align:center;max-width:100%}
+.tools{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:16px 0 20px}
+.tools input{flex:1 1 220px;max-width:320px;padding:9px 16px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font:inherit}
+.tools button{padding:9px 16px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;cursor:pointer}
+.tools button[aria-pressed="true"]{background:var(--root);color:var(--rootink)}
+button:focus-visible,input:focus-visible{outline:3px solid #3b82f6;outline-offset:2px}
+.stem{width:3px;height:22px;background:var(--line);margin:0 auto}
+.branches{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;align-items:start}
+.br{background:var(--surface);border:1.5px solid var(--line);border-inline-start:8px solid var(--c);border-radius:14px;overflow:hidden}
+.br>button{all:unset;box-sizing:border-box;display:flex;width:100%;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;font-weight:800;font-size:17px}
+.br>button:focus-visible{outline:3px solid #3b82f6;outline-offset:-3px}
+.n{flex:none;width:30px;height:30px;border-radius:50%;background:var(--c);color:#fff;display:grid;place-items:center;font-size:15px}
+.cnt{margin-inline-start:auto;color:var(--mute);font-weight:400;font-size:13px}
+.chev{transition:transform .2s;color:var(--mute)}
+.br.open .chev{transform:rotate(90deg)}
+.pats{display:none;padding:2px 12px 12px}
+.br.open .pats{display:block}
+.p{border-radius:10px;margin-top:8px;background:color-mix(in srgb,var(--c) 11%,var(--surface));border:1px solid color-mix(in srgb,var(--c) 35%,transparent)}
+.p>button{all:unset;box-sizing:border-box;width:100%;padding:8px 12px;cursor:pointer;font-weight:600;display:flex;gap:8px;align-items:center}
+.p>button:focus-visible{outline:3px solid #3b82f6;outline-offset:-3px}
+.p>button::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--c);flex:none}
+.g{display:none;padding:0 12px 10px 12px;color:var(--mute);font-size:15px}
+.p.show .g,body.all .g{display:block}
+body.quiz .p:not(.show) .g{display:none}
+.hide{display:none!important}
+mark{background:#fde68a;color:#111;border-radius:3px}
+.hint{text-align:center;color:var(--mute);font-size:14px;margin-top:22px}
+</style>
+</head>
+<body>
+<main>
+<div class="root">أنماط برامج التدخل والتدريب</div>
+<div class="tools">
+<input id="q" type="search" placeholder="ابحث عن نمط أو هدف…" aria-label="بحث">
+<button id="ex">فتح الكل</button>
+<button id="co">طيّ الكل</button>
+<button id="goals" aria-pressed="false">إظهار كل الأهداف</button>
+<button id="quiz" aria-pressed="false">وضع الحفظ</button>
+</div>
+<div class="stem"></div>
+<div class="branches" id="b"></div>
+<p class="hint">اضغط على المحور لفتح أنماطه، ثم على النمط لإظهار هدفه. في وضع الحفظ تُغلق الأهداف لتجيب عنها من ذاكرتك.</p>
+</main>
+<script>
+const D=[
+["حسب الممنهجة",[["ذاتية غير ممنهجة","تقديم خدمة آنية وسريعة (مرتجلة) تعتمد على خبرة المعالج دون خطوات علمية."],["ممنهجة","تقديم خدمة مدروسة تمر بخطوات علمية (فحص، تشخيص، علاج، متابعة) لضمان الفعالية."]]],
+["حسب أهداف التدخل",[["تقييمية","قياس مدى فعالية خطة أو أسلوب أو أداء معين في تعديل السلوك بعد تطبيقه."],["تقليدية","تطبيق إجراءات ثابتة وموحدة (روتينية) دون مراعاة الفروق الفردية."],["إصلاحية","تعديل بنية المجتمع وحمايته من المشكلات (مثل: برامج الوقاية من الإدمان)."],["تدريبية","زيادة فاعلية وكفاءة فرد أو مجموعة لأداء المهام المنوطة بهم."]]],
+["حسب عدد المستفيدين",[["فردية","حل المشكلات الخاصة ذات الطابع الفردي."],["جماعية","تغيير سلوك أفراد المجموعة من خلال استغلال التفاعل الاجتماعي بينهم."]]],
+["حسب وجهة تركيز التدخل",[["مباشرة","تقديم حلول جاهزة ونصائح مباشرة، حيث يتحمل المعالج مسؤولية التغيير."],["غير مباشرة","تمكين العميل من فهم نفسه واكتشاف حلوله بنفسه، ودور المعالج هو التيسير."]]],
+["حسب النظرية المعتمد عليها",[["سيكودينامية","تحرير الدوافع السوية، وتعزيز وظيفة الأنا، وحل الصراعات اللاشعورية."],["سلوكية","تعزيز السلوك المتوافق، وتعلم سلوكيات جديدة، أو التخلص من السلوكيات غير المرغوبة."],["معرفية سلوكية (CBT)","تعديل الأفكار والمعتقدات الخاطئة (التشوهات المعرفية)."],["جدلية سلوكية","تعليم المريض العيش في اللحظة الحالية والتأقلم مع الضغوط."],["إنسانية","مساعدة العميل على إدراك ذاته وتحقيقها وفهم حاجاته."],["واقعية","ربط العميل بواقعه الحقيقي وإدراك أن السلوك غير المسؤول سبب معاناته."],["علاج باللعب","مساعدة الأطفال على التعبير عن مشاعرهم من خلال اللعب."],["علاج جماعي","استغلال التفاعل الجماعي لتحسين العلاقات وتبادل الخبرات."],["جشتالتي","مساعدة العميل على إدراك \"الكُل\" وليس الأجزاء."],["علاج بالفن","التعبير عن المشاعر المكبوتة من خلال الرسم والموسيقى والدراما."]]],
+["حسب عمر المستفيدين",[["أطفال","التخفيف من المشكلات النمائية (العزلة، الخجل) وتنمية المهارات."],["مراهقين","مساعدتهم على التكيف مع التغيرات وحل مشكلات الهوية."],["شباب","مساعدتهم على التعامل مع التوترات والصراعات (البطالة، الدراسة)."],["راشدين","حل المشكلات الزوجية والأسرية ومشكلات العمل."],["مسنين","التخفيف من المشاعر السلبية والوحدة الناتجة عن التقاعد."]]],
+["حسب طبيعة الحالة",[["إرشادية","مساعدة الأفراد العاديين على حل مشكلاتهم الحياتية."],["علاجية","تخفيف شدة الأعراض لدى المصابين باضطرابات نفسية أو عقلية."],["فئات خاصة","تعليم وتدريب ذوي الإعاقات على مهارات الحياة اليومية."]]],
+["حسب منهج التدخل",[["نمائية","دعم النمو السوي وتنمية الجوانب الإيجابية والقدرات."],["وقائية","منع حدوث الاضطرابات (أولية)، أو اكتشافها مبكراً (ثانوية)، أو منع الانتكاسة (ثلاثية)."],["علاجية","التدخل بعد ظهور المشكلة لعلاجها وإعادة التوازن."]]]
+];
+const hues=[262,212,152,38,18,338,184,86];
+const AR="٠١٢٣٤٥٦٧٨٩";
+const B=document.getElementById("b");
+D.forEach(([t,ps],i)=>{
+  const el=document.createElement("section");el.className="br";
+  el.style.setProperty("--c","hsl("+hues[i]+" 62% 42%)");
+  el.innerHTML='<button aria-expanded="false"><span class="n">'+AR[i+1]+'</span><span>'+t+'</span><span class="cnt">'+ps.length+' أنماط</span><span class="chev">◀</span></button><div class="pats"></div>';
+  const box=el.querySelector(".pats");
+  ps.forEach(([n,g])=>{
+    const p=document.createElement("div");p.className="p";
+    p.innerHTML='<button>'+n+'</button><div class="g">'+g+'</div>';
+    p.firstChild.onclick=()=>p.classList.toggle("show");
+    box.appendChild(p);
+  });
+  el.firstChild.onclick=()=>setOpen(el,!el.classList.contains("open"));
+  B.appendChild(el);
+});
+function setOpen(el,o){el.classList.toggle("open",o);el.firstChild.setAttribute("aria-expanded",o)}
+const all=()=>[...B.children];
+ex.onclick=()=>all().forEach(e=>setOpen(e,true));
+co.onclick=()=>all().forEach(e=>setOpen(e,false));
+goals.onclick=()=>{const on=document.body.classList.toggle("all");goals.setAttribute("aria-pressed",on)};
+quiz.onclick=()=>{const on=document.body.classList.toggle("quiz");quiz.setAttribute("aria-pressed",on);
+  if(on){document.body.classList.remove("all");goals.setAttribute("aria-pressed",false);
+  document.querySelectorAll(".p").forEach(p=>p.classList.remove("show"))}};
+q.oninput=()=>{
+  const v=q.value.trim();
+  all().forEach(el=>{
+    let hit=false;
+    el.querySelectorAll(".p").forEach(p=>{
+      const m=!v||p.textContent.includes(v)||el.firstChild.textContent.includes(v);
+      p.classList.toggle("hide",!m);
+      if(m&&v)hit=true;
+    });
+    el.classList.toggle("hide",!!v&&!hit);
+    if(v&&hit)setOpen(el,true);
+  });
+};
+</script>
+</body>
+</html>
